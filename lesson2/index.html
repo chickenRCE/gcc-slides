@@ -1,0 +1,496 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>GCC Training</title>
+
+		<link rel="stylesheet" href="/dist/reset.css">
+		<link rel="stylesheet" href="/dist/reveal.css">
+		<link rel="stylesheet" href="/dist/theme/omu.css">
+
+		<!-- twemoji-awesome for emojis -->
+		<link rel="stylesheet" href="/dist/twemoji-awesome.css">
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="/plugin/highlight/monokai.css">
+		<link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+	</head>
+	<body>
+		<link rel="preload" href="http://localhost:3000/omulator/" as=document />
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h2><span class="accent-underline">Linux</span> Reverse-Engineering</h2>
+					<p>GCC 2022</p>
+					<img src="/images/Recipe.png" alt="chef chick">
+				</section>
+				<section>
+					<h2>What's been covered</h2>
+					<p>x86-64 assembly, compilation, basic instructions</p>
+				</section>
+				<section>
+					<h2>How do we distribute/store such code?</h2>
+				</section>
+				<section>
+					<h2>We need a <span class="accent">file format</span></h2>
+					<small>Any naive attempts?</small>
+				</section>
+				<section>
+					<h2>We could just have a file just containing code!</h2>
+					<small><i class="twa twa-warning"></i> issues with <span class="accent-underline">sections</span>, <span class="accent-underline">resources</span>, <span class="accent-underline">metadata</span> etc.</small>
+				</section>
+				<section>
+					<h2>Let's welcome the ELF</h2>
+					<div class="flex justify-center">
+						<img style="width: 20%;" src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fimage.freepik.com%2Ffree-icon%2Felf-file-format-variant_318-45726.jpg&f=1&nofb=1" alt="">
+					</div>
+				</section>
+				<section>
+					<img src="https://github.com/corkami/pics/blob/master/binary/ELF.png?raw=true" alt="">	
+				</section>
+				<section>
+					<small><code>helloworld.c</code></small>
+					<pre><code class="c" data-trim data-noescape>
+#include &lt;stdio.h&gt;
+
+int main(){
+    puts("Hello World!");
+    return 0;
+}
+					</code></pre>
+				</section>
+				<section>
+					<h2>Let's take a look at this <span class="accent-underline">compiled</span> <span class="accent">ELF</span></h2>
+					<div class="flex justify-center">
+						<a style="width:20%" target="_blank" rel="noopener" href="https://cloud.binary.ninja/bn/030bd813-d258-42d8-a854-23c0549c6df2">
+							<img style="width: 100%" src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fbinary.ninja%2Fimages%2Fbinjy-waving.png&f=1&nofb=1" alt="">
+						</a>
+					</div>
+				</section>
+				<section>
+					<h2>Deeper dive into <span class="accent">functions</span></h2>
+				</section>
+				<section>
+					<h2>Functions heavily make use of the program <span class="accent">stack</span></h2>
+				</section>
+				<section>
+					<h2><code>push</code></h2>
+					<div class="flex justify-around">
+						<div class="left w-4/12">
+							<h5>Syntax:</h5>
+							<code class="text-3xl">push &lt;op&gt;</code>
+							<h5 style="margin-top: 24px;">Functionality:</h5>
+							<small>Pushes the QWORD in &lt;op&gt; on to the stack</small>
+						</div>
+						<div class="right w-4/12">
+							<h5>Sample Code</h5>
+							<pre><code class="x86asm" data-trim data-noescape>
+mov     rax, 100
+mov     rbx, 200
+push    rax
+push    rbx
+							</code></pre>
+						</div>
+					</div>
+				</section>
+				<section>
+					<h2><code>pop</code></h2>
+					<div class="flex justify-around">
+						<div class="left w-4/12">
+							<h5>Syntax:</h5>
+							<code class="text-3xl">pop &lt;dst&gt;</code>
+							<h5 style="margin-top: 24px;">Functionality:</h5>
+							<small>Pops the top QWORD in the stack into &lt;dst&gt;</small>
+						</div>
+						<div class="right w-4/12">
+							<h5>Sample Code</h5>
+							<pre><code class="x86asm" data-trim data-noescape>
+mov     rax, 100
+mov     rbx, 200
+push    rax
+push    rbx
+pop     rcx
+pop     rdx
+							</code></pre>
+						</div>
+					</div>
+				</section>
+				<section>
+					<h2><code>push/pop</code></h2>
+					<iframe loading="lazy" class="w-full h-96" src="http://localhost:3000/omulator/?code=bW92ICAgcmF4LCAxMDAKbW92ICAgcmJ4LCAyMDAKcHVzaCAgcmF4CnB1c2ggIHJieApwb3AgICByY3gKcG9wICAgcmR4" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+				<section>
+					<h2>How does this enable functions?</h2>
+				</section>
+				<section>
+					<h2><code>functions</code></h2>
+					<iframe loading="lazy" class="w-full h-96" src="http://localhost:3000/omulator/?code=bWFpbjoKbW92ICAgcmF4LCAxCmNhbGwgIGZvbwpjYWxsICBiYXIKaGx0Cgpmb286Cm1vdiAgIHJheCwgMgpyZXQKCmJhcjoKbW92ICAgcmF4LCAzCnJldAo%3D" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+				<section>
+					<h2><code>nested functions</code></h2>
+					<iframe loading="lazy" class="w-full h-96" src="http://localhost:3000/omulator/?code=bWFpbjoKbW92ICAgcmF4LCAxCmNhbGwgIGZvbwpobHQKCmZvbzoKbW92ICAgcmF4LCAyCmNhbGwgIGJhcgpyZXQKCmJhcjoKbW92ICAgcmF4LCAzCnJldAo%3D" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+				<section>
+					<h2>Deconstructing a function</h2>
+					<pre><code class="c" data-trim data-noescape>
+int foo(int a, int b){
+    puts("Inside function (foo)");
+    return a + b;
+}
+					</code></pre>
+				</section>
+				<section>
+					<h2>ABI</h2>
+					<div class="flex justify-center">
+						<img src="/images/ABI.png" alt="">
+					</div>
+				</section>
+				<section>
+					<h2>Return value</h2>
+					<pre><code class="c" data-trim data-noescape>
+int foo(...){
+    ...
+    return a + b;
+}
+					</code></pre>
+				</section>
+				<section>
+					<blockquote>
+						The return value is stored in the rax register, or if it is a 128-bit value, then the higher 64-bits go in rdx.
+					</blockquote>
+				</section>
+				<section>
+					<h2>Return value</h2>
+					<div class="flex flex-row">
+						<div class="w-1/2">
+							<h4>C source</h4>
+							<pre><code class="c" data-trim data-noescape>
+int foo(){
+    return 1000;
+}
+							</code></pre>
+						</div>
+						<div class="w-1/2">
+							<h4>x86-64</h4>
+							<pre><code class="x86asm" data-trim data-noescape>
+foo:
+        push    rbp
+        mov     rbp, rsp
+        mov     eax, 1000
+        pop     rbp
+        ret
+							</code></pre>
+						</div>
+					</div>
+				</section>
+				<section>
+					<h2>Parameters/Arguments</h2>
+					<pre><code class="c" data-trim data-noescape>
+int foo(int a, int b, ...){
+    ...
+}
+					</code></pre>
+				</section>
+				<section>
+					<blockquote>
+						Parameters to functions are passed in the registers rdi, rsi, rdx, rcx, r8, r9, and further values are passed on the stack in reverse order.
+					</blockquote>
+				</section>
+				<section>
+					<h2>Parameters/Arguments</h2>
+					<div class="flex flex-row">
+						<div class="w-1/2">
+							<h4>C source</h4>
+							<pre><code class="c" data-trim data-noescape>
+int main() {
+    foo(1,2,3,4,5);
+}
+
+int foo(int a, int b, int c, int d, int e){
+    return 1;
+}
+							</code></pre>
+						</div>
+						<div class="w-1/2">
+							<h4>x86-64</h4>
+							<pre><code class="x86asm" data-trim data-noescape>
+main:
+        push    rbp
+        mov     rbp, rsp
+        mov     r8d, 5
+        mov     ecx, 4
+        mov     edx, 3
+        mov     esi, 2
+        mov     edi, 1
+        mov     eax, 0
+        call    foo
+        mov     eax, 0
+        pop     rbp
+        ret
+foo:
+        push    rbp
+        mov     rbp, rsp
+        mov     DWORD PTR [rbp-4], edi
+        mov     DWORD PTR [rbp-8], esi
+        mov     DWORD PTR [rbp-12], edx
+        mov     DWORD PTR [rbp-16], ecx
+        mov     DWORD PTR [rbp-20], r8d
+        mov     eax, 1
+        pop     rbp
+        ret
+							</code></pre>
+						</div>
+					</div>
+				</section>
+				<section>
+					<div class="flex">
+						<h4>..Disassemblers</h4>
+					</div>
+					<table>
+						<tr>
+							<th></th>
+							<th>Ghidra</th>
+							<th>Binary Ninja</th>
+							<th>IDA</th>
+						</tr>
+						<tr>
+							<th>Free?</th>
+							<td>Yes!</td>
+							<td>Free-ish</td>
+							<td>No/Yes</td>
+						</tr>
+						<tr>
+							<th>Decompiler?</th>
+							<td>Yes!</td>
+							<td>Kinda</td>
+							<td>Yes/No</td>
+						</tr>
+						<tr>
+							<th>*NSA backdoor?</th>
+							<td>Yes!</td>
+							<td>Hopefully not</td>
+							<td style="vertical-align: middle;"><img style="margin: 0;" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSNbVSVXVd5Il9eeD4Lbup3pqtJ3Kn-a1bueH56ZA1oWcFqw9i7LaIKUWzBE7FZAlHyKwo&usqp=CAU" alt=""></td>
+						</tr>
+					</table> 
+					<div class="flex flex-row-reverse">
+						<small>*Ghidra/IDA is fine, just a joke.</small>
+					</div>
+				</section>
+				<section>
+					<h2>What are instructions?</h2>
+				</section>
+				<section>
+					<h2>Flow of execution</h2>
+					<div class="flex justify-center">
+						<img src="/images/Recipe.png" alt="chick pointing at a recipe with a ruler that is labelled RIP">
+					</div>
+				</section>
+				<section>
+					<h2>A simple snippet</h2>
+					<iframe loading="lazy" class="w-full h-80" src="http://localhost:3000/omulator/?code=cHVzaCAgcmJwCm1vdiAgIHJicCwgcnNwCm1vdiAgIFtyYnAtNF0sIGVkaQptb3YgICBbcmJwLThdLCBlc2kKbW92ICAgZWR4LCBbcmJwLTRdCm1vdiAgIGVheCwgW3JicC04XQphZGQgICBlYXgsIGVkeApwb3AgICByYnAKcmV0Cg%3D%3D" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+				<section>
+					<h2>Baby's first instruction</h2>
+					<iframe loading="lazy" class="w-full h-80" src="http://localhost:3000/omulator/?code=bm9wCm5vcApub3AKbm9wCm5vcAo%3D" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+				<section>
+					<h2>A short tangent.</h2>
+				</section>
+				<section>
+					<h2>What are <span class="accent-underline">registers</span> and <span class="accent-underline">memory</span>?</h2>
+				</section>
+				<section>
+					<h2>Continuing the analogy...</h2>
+					<div class="flex justify-center">
+						<img src="/images/BowlTable.png" alt="">
+					</div>
+				</section>
+				<section>
+					<h2><code>mov</code></h2>
+					<div class="flex justify-around">
+						<div class="left w-4/12">
+							<h5>Syntax:</h5>
+							<code class="text-3xl">mov &lt;dst&gt; &lt;src&gt;</code>
+							<h5 style="margin-top: 24px;">Functionality:</h5>
+							<small>"Moves" the value from &lt;src&gt; to &lt;dst&gt;</small>
+						</div>
+						<div class="right w-4/12">
+							<h5>Sample Code</h5>
+							<pre><code class="x86asm" data-trim data-noescape>
+mov     rax, 1337
+mov     rbx, 2022
+mov     rcx, rbx
+							</code></pre>
+						</div>
+					</div>
+				</section>
+				<section>
+					<h2><code>mov</code></h2>
+					<iframe loading="lazy" class="w-full h-80" src="http://localhost:3000/omulator/?code=bW92IHJheCwgMTMzNwptb3YgcmJ4LCAyMDIyCm1vdiByY3gsIHJieA%3D%3D" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+				<section>
+					<h2><code>add/sub</code></h2>
+					<div class="flex justify-around">
+						<div class="left w-4/12">
+							<h5>Syntax:</h5>
+							<code class="text-3xl">add &lt;dst&gt; &lt;src&gt;</code>
+							<h5 style="margin-top: 24px;">Functionality:</h5>
+							<small>Adds the value from &lt;src&gt; to &lt;dst&gt;, result in &lt;dst&gt;</small>
+						</div>
+						<div class="right w-4/12">
+							<h5>Sample Code</h5>
+							<pre><code class="x86asm" data-trim data-noescape>
+mov     rax, 100
+mov     rbx, 200
+add     rax, rbx
+							</code></pre>
+						</div>
+					</div>
+				</section>
+				<section>
+					<h2><code>add/sub</code></h2>
+					<iframe loading="lazy" class="w-full h-80" src="http://localhost:3000/omulator/?code=bW92IHJheCwgMTAwCm1vdiByYngsIDIwMAphZGQgcmF4LCByYngK" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+				<section>
+					<h2>Mini Challenges <span class="accent">#1</span></h2>
+				</section>
+				<section>
+					<h2>What about more <span class="accent-underline">complex</span> code?</h2>
+				</section>
+				<section>
+					<h2>e.g.</h2>
+							<pre><code class="c" data-trim data-noescape>
+if(some_condition){
+	do_something();
+}
+else {
+	do_something_else();
+}
+							</code></pre>
+
+				</section>
+				<section>
+					<h2><code>jmp</code></h2>
+					<div class="flex justify-around">
+						<div class="left w-4/12">
+							<h5>Syntax:</h5>
+							<code class="text-3xl">jmp &lt;dst&gt;</code>
+							<h5 style="margin-top: 24px;">Functionality:</h5>
+							<small>Jumps to execute code at &lt;dst&gt;</small>
+						</div>
+						<div class="right w-4/12">
+							<h5>Sample Code</h5>
+							<pre><code class="x86asm" data-trim data-noescape>
+mov     rax, 100
+jmp     skip
+mov     rax, 1337
+skip:
+nop
+nop
+							</code></pre>
+						</div>
+					</div>
+				</section>
+				<section>
+					<h2><code>jmp</code></h2>
+					<iframe loading="lazy" class="w-full h-80" src="http://localhost:3000/omulator/?code=bW92IHJheCwgMTAwCmptcCBza2lwCm1vdiByYXgsIDEzMzcKc2tpcDoKbm9wCm5vcAo%3D" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+				<section>
+					<h2><code>cmp</code></h2>
+					<div class="flex justify-around">
+						<div class="left w-4/12">
+							<h5>Syntax:</h5>
+							<code class="text-3xl">cmp &lt;a&gt;, &lt;b&gt;</code>
+							<h5 style="margin-top: 24px;">Functionality:</h5>
+							<small>Compares the values of &lt;a&gt; and &lt;b&gt; and sets <code>EFLAGS</code></small>
+						</div>
+						<div class="right w-4/12">
+							<h5>Sample Code</h5>
+							<pre><code class="x86asm" data-trim data-noescape>
+mov     rax, 100
+mov     rbx, 200
+cmp     rax, rbx
+							</code></pre>
+						</div>
+					</div>
+				</section>
+				<section>
+					<h2><code>jmp (cond)</code></h2>
+					<div class="flex justify-around">
+						<div class="left w-4/12">
+							<h5>Syntax:</h5>
+							<code class="text-3xl">j<strong>cc</strong> &lt;dst&gt;</code>
+							<h5 style="margin-top: 24px;">Functionality:</h5>
+							<small>Does a conditional jump to &lt;dst&gt; based on <code>EFLAGS</code></small>
+						</div>
+						<div class="right w-4/12">
+							<h5>Sample Code</h5>
+							<pre><code class="x86asm" data-trim data-noescape>
+mov     rax, 100
+mov     rbx, 200
+cmp     rax, rbx
+mov     rcx, rax
+jl      rbx_lesser
+mov     rcx, rbx
+rbx_lesser:
+nop
+							</code></pre>
+						</div>
+					</div>
+				</section>
+				<section>
+					<h2><code>jmp (cond)</code></h2>
+					<iframe loading="lazy" class="w-full h-80" src="http://localhost:3000/omulator/?code=bW92ICByYXgsIDEwMAptb3YgIHJieCwgMjAwCmNtcCAgcmF4LCByYngKbW92ICByY3gsIHJieApqbCAgIHJheF9sZXNzZXIKbW92ICByY3gsIHJheApyYXhfbGVzc2VyOgpub3AK" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+				<section>
+					<h2><code>call</code></h2>
+					<div class="flex justify-around">
+						<div class="left w-4/12">
+							<h5>Syntax:</h5>
+							<code class="text-3xl">call &lt;dst&gt;</code>
+							<h5 style="margin-top: 24px;">Functionality:</h5>
+							<small>Calls the function located at &lt;dst&gt;</code></small>
+						</div>
+						<div class="right w-4/12">
+							<h5>Sample Code</h5>
+							<pre><code class="x86asm" data-trim data-noescape>
+nop
+call    foo
+hlt
+foo:
+mov     rax, 0
+ret
+nop
+							</code></pre>
+						</div>
+					</div>
+				</section>
+				<section>
+					<h2><code>call</code></h2>
+					<iframe loading="lazy" class="w-full h-80" src="http://localhost:3000/omulator/?code=bm9wCmNhbGwgZm9vCmhsdApmb286Cm1vdiAgcmF4LCAwCnJldApub3A%3D" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+				<section>
+					<h2>Mini Challenges <span class="accent">#2</span></h2>
+				</section>
+			</div>
+		</div>
+
+		<script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
+		<script src="/dist/reveal.js"></script>
+		<script src="/plugin/notes/notes.js"></script>
+		<script src="/plugin/markdown/markdown.js"></script>
+		<script src="/plugin/highlight/highlight.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+			});
+		</script>
+	</body>
+</html>

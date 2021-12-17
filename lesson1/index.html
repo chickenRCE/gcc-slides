@@ -1,0 +1,480 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>GCC Training</title>
+
+		<link rel="stylesheet" href="/dist/reset.css">
+		<link rel="stylesheet" href="/dist/reveal.css">
+		<link rel="stylesheet" href="/dist/theme/omu.css">
+
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="/plugin/highlight/monokai.css">
+		<link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+	</head>
+	<body>
+		<link rel="preload" href="http://localhost:3000/omulator/" as=document />
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h2><span class="accent-underline">Reverse-Engineering</span> & <br/><span class="accent-underline">Exploitation</span><br/>Fundamentals</h2>
+					<p>GCC 2022</p>
+					<img src="/images/Laptop.png" alt="chick with laptop">
+				</section>
+				<section>
+					<h2>whoarewe</h2>
+					<div class="flex flex-row justify-around">
+						<div class="flex flex-col items-center">
+							<img src="/images/Idiot.png" alt="lord idiot chicken" class="w-48">
+							<p>GCC 2018 Alumni</p>
+							<p>Pwn2Own 2021</p>
+						</div>
+						<div class="flex flex-col items-center">
+							<img src="/images/Daniao.png" alt="daniao egg" class="w-48">
+							<p>ACSC Malaysia</p>
+							<p>Routers & Apple</p>
+						</div>
+					</div>
+				</section>
+				<section>
+					<h2>What is Reverse-Engineering?</h2>
+					<p>... the goal of a reverse engineering ... is to <span class="accent-underline">understand the functionality</span> of a given program such that you can <span class="accent-underline">identify deeper issues.</span></p>
+					<p>~ ctf101.org</p>
+				</section>
+				<section>
+					<h2>Is RE useful?</h2>
+					<small>Learning reverse-engineering <span class="accent-underline">isn't</span> just for those juicy CTF points</small>
+				</section>
+				<section>
+					<div class="flex flex-row justify-around">
+						<div class="flex flex-col items-center w-3/12">
+							<h3>Game Hacking</h3>
+							<small>Games are commonly closed-source and RE is required to understand their inner workings</small>
+						</div>
+						<div class="flex flex-col items-center w-3/12">
+							<h3>Bug Hunting</h3>
+							<small>Reverse-engineering a software to understand how it works at a low-level allows us to uncover software bugs</small>
+						</div>
+						<div class="flex flex-col items-center w-3/12">
+							<h3>Malware</h3>
+							<small>Reverse-engineering operating systems to understand how to best create malware / Reverse-engineering malware</small>
+						</div>
+					</div>
+				</section>
+				<section>
+					<small>Let's start with building blocks ...</small>
+					<h2>Assembly Language (<span class="accent-underline">x86-64</span>)</h2>
+					<div class="flex flex-row justify-center w-full">
+						<img src="/images/Blocks.png" alt="chick building blocks">
+					</div>
+				</section>
+				<section><h2>How do programs run in the computer?</h2></section>
+				<section>
+					<h2>An analogy for the CPU</h2>
+					<div class="flex flex-row justify-center">
+						<img src="https://media2.giphy.com/media/3o85xnoIXebk3xYx4Q/giphy.gif?cid=ecf05e47fql8tgxzxelaw9o5tdp1dmk06gnusnj7u7gvsn8r&rid=giphy.gif&ct=g" alt="">
+					</div>
+				</section>
+				<section>
+					<h2>An introduction to Bob</h2>
+					<div class="flex flex-row justify-center">
+						<img src="/images/Bob.png" alt="">
+					</div>
+				</section>
+				<section>
+					<h2>Bob can only understand</h2>
+					<small>... simple instructions</small>
+					<pre><code data-trim data-noescape>
+fill &lt;bowl&gt;&comma; &lt;ingredient&sol;bowl&gt;&NewLine;stir &lt;bowl&gt;&NewLine;chop &lt;bowl&gt;&NewLine;boil &lt;bowl&gt;&comma; &lt;time&gt;&NewLine;
+					</code></pre>
+				</section>
+				<section>
+					<h2>Let's prepare fried rice!</h2>
+					<pre><code data-trim data-noescape>
+; cook rice
+fill     A, rice
+fill     A, water
+boil     A, 18 minutes
+stir     A
+
+; ingredients
+fill     B, onions
+fill     B, carrots
+chop     B
+boil     B, peas
+
+; mix to fry
+fill     B, A
+					</code></pre>
+				</section>
+				<section>
+					<h2>Too verbose</h2>
+					<small>More complicated recipes would be way too tedious to write</small>
+				</section>
+				<section>
+					<small>The solution ... ?</small>
+					<h2>Compilers!</h2>
+				</section>
+				<section>
+					<h2>Let's welcome Alice</h2>
+					<div class="flex flex-row justify-center w-full">
+						<img src="/images/Alice.png" alt="">
+					</div>
+				</section>
+				<section>
+					<h2>Alice is far smarter than Bob</h2>
+					<small>Alice can <strong>compile</strong> higher-level instructions into a format that <strong>Bob</strong> will be able to understand</small>
+				</section>
+				<section>
+					<h2>Recipe Compilation</h2>
+					<div class="flex flex-row">
+						<div class="w-1/2">
+							<h4>Alice</h4>
+							<pre><code data-trim data-noescape>
+1. Boil rice for 18 minutes
+2. Chop onions and carrots
+3. Mix the onions, carrots
+   and peas with the rice
+							</code></pre>
+						</div>
+						<div class="w-1/2">
+							<h4>Bob</h4>
+							<pre><code data-trim data-noescape>
+; cook rice
+fill     A, rice
+fill     A, water
+boil     A, 18 minutes
+stir     A
+
+; ingredients
+fill     B, onions
+fill     B, carrots
+chop     B
+boil     B, peas
+
+; mix to fry
+fill     B, A
+							</code></pre>
+						</div>
+					</div>
+				</section>
+				<section>
+					<h2>The <span class="accent">same</span> is done for programs!</h2>
+				</section>
+				<section>
+					<h2>Program Compilation</h2>
+					<div class="flex flex-row">
+						<div class="w-1/2">
+							<h4>Alice</h4>
+							<pre><code class="c" data-trim data-noescape>
+int main(){
+    int a = 1337;
+    int b = 31337;
+    return a+b;
+}
+							</code></pre>
+						</div>
+						<div class="w-1/2">
+							<h4>Bob</h4>
+							<pre><code class="x86asm" data-trim data-noescape>
+push    rbp
+mov     rbp, rsp
+mov     DWORD PTR [rbp-4], 1337
+mov     DWORD PTR [rbp-8], 31337
+mov     edx, DWORD PTR [rbp-4]
+mov     eax, DWORD PTR [rbp-8]
+add     eax, edx
+pop     rbp
+ret
+							</code></pre>
+						</div>
+					</div>
+				</section>
+				<section>
+					<h2>Internally ...</h2>
+					<div class="flex flex-row">
+						<div class="w-1/2">
+							<h4>x86-64 mnemonic</h4>
+							<pre><code class="x86asm" data-trim data-noescape>
+push    rbp
+mov     rbp, rsp
+mov     DWORD PTR [rbp-4], 1337
+mov     DWORD PTR [rbp-8], 31337
+mov     edx, DWORD PTR [rbp-4]
+mov     eax, DWORD PTR [rbp-8]
+add     eax, edx
+pop     rbp
+ret
+							</code></pre>
+						</div>
+						<div class="w-1/2">
+							<h4>hex representation</h4>
+							<pre><code data-trim data-noescape>
+55
+48 89 E5
+C7 45 FC 39 05 00 00
+C7 45 F8 69 7A 00 00
+8B 55 FC
+8B 45 F8
+01 D0
+5D
+C3
+							</code></pre>
+						</div>
+					</div>
+				</section>
+				<section>
+					<h2>How can we <span class="accent-underline">analyse</span> such programs?</h2>
+				</section>
+				<section>
+					<div class="flex">
+						<h4>..Disassemblers</h4>
+					</div>
+					<table>
+						<tr>
+							<th></th>
+							<th>Ghidra</th>
+							<th>Binary Ninja</th>
+							<th>IDA</th>
+						</tr>
+						<tr>
+							<th>Free?</th>
+							<td>Yes!</td>
+							<td>Free-ish</td>
+							<td>No/Yes</td>
+						</tr>
+						<tr>
+							<th>Decompiler?</th>
+							<td>Yes!</td>
+							<td>Kinda</td>
+							<td>Yes/No</td>
+						</tr>
+						<tr>
+							<th>*NSA backdoor?</th>
+							<td>Yes!</td>
+							<td>Hopefully not</td>
+							<td style="vertical-align: middle;"><img style="margin: 0;" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSNbVSVXVd5Il9eeD4Lbup3pqtJ3Kn-a1bueH56ZA1oWcFqw9i7LaIKUWzBE7FZAlHyKwo&usqp=CAU" alt=""></td>
+						</tr>
+					</table> 
+					<div class="flex flex-row-reverse">
+						<small>*Ghidra/IDA is fine, just a joke.</small>
+					</div>
+				</section>
+				<section>
+					<h2>What are instructions?</h2>
+				</section>
+				<section>
+					<h2>Flow of execution</h2>
+					<div class="flex justify-center">
+						<img src="/images/Recipe.png" alt="chick pointing at a recipe with a ruler that is labelled RIP">
+					</div>
+				</section>
+				<section>
+					<h2>A simple snippet</h2>
+					<iframe loading="lazy" class="w-full h-80" src="http://localhost:3000/omulator/?code=cHVzaCAgcmJwCm1vdiAgIHJicCwgcnNwCm1vdiAgIFtyYnAtNF0sIGVkaQptb3YgICBbcmJwLThdLCBlc2kKbW92ICAgZWR4LCBbcmJwLTRdCm1vdiAgIGVheCwgW3JicC04XQphZGQgICBlYXgsIGVkeApwb3AgICByYnAKcmV0Cg%3D%3D" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+				<section>
+					<h2>Baby's first instruction</h2>
+					<iframe loading="lazy" class="w-full h-80" src="http://localhost:3000/omulator/?code=bm9wCm5vcApub3AKbm9wCm5vcAo%3D" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+				<section>
+					<h2>A short tangent.</h2>
+				</section>
+				<section>
+					<h2>What are <span class="accent-underline">registers</span> and <span class="accent-underline">memory</span>?</h2>
+				</section>
+				<section>
+					<h2>Continuing the analogy...</h2>
+					<div class="flex justify-center">
+						<img src="/images/BowlTable.png" alt="">
+					</div>
+				</section>
+				<section>
+					<h2><code>mov</code></h2>
+					<div class="flex justify-around">
+						<div class="left w-4/12">
+							<h5>Syntax:</h5>
+							<code class="text-3xl">mov &lt;dst&gt; &lt;src&gt;</code>
+							<h5 style="margin-top: 24px;">Functionality:</h5>
+							<small>"Moves" the value from &lt;src&gt; to &lt;dst&gt;</small>
+						</div>
+						<div class="right w-4/12">
+							<h5>Sample Code</h5>
+							<pre><code class="x86asm" data-trim data-noescape>
+mov     rax, 1337
+mov     rbx, 2022
+mov     rcx, rbx
+							</code></pre>
+						</div>
+					</div>
+				</section>
+				<section>
+					<h2><code>mov</code></h2>
+					<iframe loading="lazy" class="w-full h-80" src="http://localhost:3000/omulator/?code=bW92IHJheCwgMTMzNwptb3YgcmJ4LCAyMDIyCm1vdiByY3gsIHJieA%3D%3D" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+				<section>
+					<h2><code>add/sub</code></h2>
+					<div class="flex justify-around">
+						<div class="left w-4/12">
+							<h5>Syntax:</h5>
+							<code class="text-3xl">add &lt;dst&gt; &lt;src&gt;</code>
+							<h5 style="margin-top: 24px;">Functionality:</h5>
+							<small>Adds the value from &lt;src&gt; to &lt;dst&gt;, result in &lt;dst&gt;</small>
+						</div>
+						<div class="right w-4/12">
+							<h5>Sample Code</h5>
+							<pre><code class="x86asm" data-trim data-noescape>
+mov     rax, 100
+mov     rbx, 200
+add     rax, rbx
+							</code></pre>
+						</div>
+					</div>
+				</section>
+				<section>
+					<h2><code>add/sub</code></h2>
+					<iframe loading="lazy" class="w-full h-80" src="http://localhost:3000/omulator/?code=bW92IHJheCwgMTAwCm1vdiByYngsIDIwMAphZGQgcmF4LCByYngK" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+				<section>
+					<h2>Mini Challenges <span class="accent">#1</span></h2>
+				</section>
+				<section>
+					<h2>What about more <span class="accent-underline">complex</span> code?</h2>
+				</section>
+				<section>
+					<h2>e.g.</h2>
+							<pre><code class="c" data-trim data-noescape>
+if(some_condition){
+	do_something();
+}
+else {
+	do_something_else();
+}
+							</code></pre>
+
+				</section>
+				<section>
+					<h2><code>jmp</code></h2>
+					<div class="flex justify-around">
+						<div class="left w-4/12">
+							<h5>Syntax:</h5>
+							<code class="text-3xl">jmp &lt;dst&gt;</code>
+							<h5 style="margin-top: 24px;">Functionality:</h5>
+							<small>Jumps to execute code at &lt;dst&gt;</small>
+						</div>
+						<div class="right w-4/12">
+							<h5>Sample Code</h5>
+							<pre><code class="x86asm" data-trim data-noescape>
+mov     rax, 100
+jmp     skip
+mov     rax, 1337
+skip:
+nop
+nop
+							</code></pre>
+						</div>
+					</div>
+				</section>
+				<section>
+					<h2><code>jmp</code></h2>
+					<iframe loading="lazy" class="w-full h-80" src="http://localhost:3000/omulator/?code=bW92IHJheCwgMTAwCmptcCBza2lwCm1vdiByYXgsIDEzMzcKc2tpcDoKbm9wCm5vcAo%3D" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+				<section>
+					<h2><code>cmp</code></h2>
+					<div class="flex justify-around">
+						<div class="left w-4/12">
+							<h5>Syntax:</h5>
+							<code class="text-3xl">cmp &lt;a&gt;, &lt;b&gt;</code>
+							<h5 style="margin-top: 24px;">Functionality:</h5>
+							<small>Compares the values of &lt;a&gt; and &lt;b&gt; and sets <code>EFLAGS</code></small>
+						</div>
+						<div class="right w-4/12">
+							<h5>Sample Code</h5>
+							<pre><code class="x86asm" data-trim data-noescape>
+mov     rax, 100
+mov     rbx, 200
+cmp     rax, rbx
+							</code></pre>
+						</div>
+					</div>
+				</section>
+				<section>
+					<h2><code>jmp (cond)</code></h2>
+					<div class="flex justify-around">
+						<div class="left w-4/12">
+							<h5>Syntax:</h5>
+							<code class="text-3xl">j<strong>cc</strong> &lt;dst&gt;</code>
+							<h5 style="margin-top: 24px;">Functionality:</h5>
+							<small>Does a conditional jump to &lt;dst&gt; based on <code>EFLAGS</code></small>
+						</div>
+						<div class="right w-4/12">
+							<h5>Sample Code</h5>
+							<pre><code class="x86asm" data-trim data-noescape>
+mov     rax, 100
+mov     rbx, 200
+cmp     rax, rbx
+mov     rcx, rax
+jl      rbx_lesser
+mov     rcx, rbx
+rbx_lesser:
+nop
+							</code></pre>
+						</div>
+					</div>
+				</section>
+				<section>
+					<h2><code>jmp (cond)</code></h2>
+					<iframe loading="lazy" class="w-full h-80" src="http://localhost:3000/omulator/?code=bW92ICByYXgsIDEwMAptb3YgIHJieCwgMjAwCmNtcCAgcmF4LCByYngKbW92ICByY3gsIHJieApqbCAgIHJheF9sZXNzZXIKbW92ICByY3gsIHJheApyYXhfbGVzc2VyOgpub3AK" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+				<section>
+					<h2><code>call</code></h2>
+					<div class="flex justify-around">
+						<div class="left w-4/12">
+							<h5>Syntax:</h5>
+							<code class="text-3xl">call &lt;dst&gt;</code>
+							<h5 style="margin-top: 24px;">Functionality:</h5>
+							<small>Calls the function located at &lt;dst&gt;</code></small>
+						</div>
+						<div class="right w-4/12">
+							<h5>Sample Code</h5>
+							<pre><code class="x86asm" data-trim data-noescape>
+nop
+call    foo
+hlt
+foo:
+mov     rax, 0
+ret
+nop
+							</code></pre>
+						</div>
+					</div>
+				</section>
+				<section>
+					<h2><code>call</code></h2>
+					<iframe loading="lazy" class="w-full h-80" src="http://localhost:3000/omulator/?code=bm9wCmNhbGwgZm9vCmhsdApmb286Cm1vdiAgcmF4LCAwCnJldApub3A%3D" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+				<section>
+					<h2>Mini Challenges <span class="accent">#2</span></h2>
+				</section>
+			</div>
+		</div>
+
+		<script src="/dist/reveal.js"></script>
+		<script src="/plugin/notes/notes.js"></script>
+		<script src="/plugin/markdown/markdown.js"></script>
+		<script src="/plugin/highlight/highlight.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+			});
+		</script>
+	</body>
+</html>
