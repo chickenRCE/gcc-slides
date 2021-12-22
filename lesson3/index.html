@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>GCC Training</title>
+
+		<link rel="stylesheet" href="/dist/reset.css">
+		<link rel="stylesheet" href="/dist/reveal.css">
+		<link rel="stylesheet" href="/dist/theme/omu.css">
+
+		<!-- twemoji-awesome for emojis -->
+		<link rel="stylesheet" href="/dist/twemoji-awesome.css">
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="/plugin/highlight/monokai.css">
+		<link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+	</head>
+	<body>
+		<link rel="preload" href="http://localhost:3000/omulator/" as=document />
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h2>Buffer <span class="accent-underline">Overflows</span></h2>
+					<p>GCC 2022</p>
+					<div class="flex justify-center">
+						<img src="/images/Boat.png" alt="boat chick">
+					</div>
+				</section>
+				<section>
+					<h2>Let's revisit the <span class="accent">stack</span></h2>
+				</section>
+				<section>
+					<h2><code>Example #1</code></h2>
+					<iframe loading="lazy" class="w-full h-96" src="http://localhost:3000/omulator/?code=bW92IHJheCwgMTAwMAptb3YgcmJ4LCAyMDAwCnB1c2ggcmF4CnB1c2ggcmJ4CnBvcCAgcmN4CnBvcCAgcmR4Cg%3D%3D" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+				<section>
+					<h2><code>Example #2</code></h2>
+					<iframe loading="lazy" class="w-full h-96" src="http://localhost:3000/omulator/?code=Zm9vOgpwdXNoICByYnAKbW92ICAgcmJwLCByc3AKc3ViICAgcnNwLCAweDEwCm1vdiAgIERXT1JEIFBUUiBbcmJwLTB4Y10sIDB4M2U4Cm1vdiAgIERXT1JEIFBUUiBbcmJwLTB4OF0sIDB4N2QwCm1vdiAgIERXT1JEIFBUUiBbcmJwLTB4NF0sIDB4YmI4Cm1vdiAgIGVkeCwgRFdPUkQgUFRSIFtyYnAtMHhjXQptb3YgICBlYXgsIERXT1JEIFBUUiBbcmJwLTB4OF0KYWRkICAgZWR4LCBlYXgKbW92ICAgZWF4LCBEV09SRCBQVFIgW3JicC0weDRdCmFkZCAgIGVheCwgZWR4CmxlYXZlCnJldA%3D%3D" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+				<section>
+					<h2>With the stack, each function call maintains its local state!</h2>
+				</section>
+				<section>
+					<div class="flex justify-center">
+						<img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fd%2Fd3%2FCall_stack_layout.svg%2F342px-Call_stack_layout.svg.png&f=1&nofb=1" alt="">
+					</div>
+				</section>
+				<section>
+					<h2><code>function stacks</code></h2>
+					<iframe loading="lazy" class="w-full h-96" src="http://localhost:3000/omulator/?code=bWFpbjoKICBwdXNoICByYnAKICBtb3YgICByYnAsIHJzcAogIG1vdiAgIGVheCwgMAogIGNhbGwgIGEKICBub3AKICBwb3AgICByYnAKICByZXQKYToKICBwdXNoICByYnAKICBtb3YgICByYnAsIHJzcAogIHN1YiAgIHJzcCwgMTYKICBtb3YgICBEV09SRCBQVFIgW3JicC00XSwgMHhBQUFBCiAgbW92ICAgZWF4LCAwCiAgY2FsbCAgYgogIG5vcAogIGxlYXZlCiAgcmV0CmI6CiAgcHVzaCAgcmJwCiAgbW92ICAgcmJwLCByc3AKICBtb3YgICBEV09SRCBQVFIgW3JicC00XSwgMHhCQkJCCiAgbm9wCiAgcG9wICAgcmJwCiAgcmV0" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+				<section>
+					<h2>What happens when we destroy the stack?</h2>
+				</section>
+				<section>
+					<h2><code>destroying the stack</code></h2>
+					<iframe loading="lazy" class="w-full h-96" src="http://localhost:3000/omulator/?code=bWFpbjoKICBwdXNoICByYnAKICBtb3YgICByYnAsIHJzcAogIG1vdiAgIGVheCwgMAogIGNhbGwgIGEKICBub3AKICBwb3AgICByYnAKICByZXQKYToKICBwdXNoICByYnAKICBtb3YgICByYnAsIHJzcAogIHN1YiAgIHJzcCwgMTYKICBtb3YgICBEV09SRCBQVFIgW3JicCs4XSwgMHhBQUFBCiAgbGVhdmUKICByZXQK" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+			</div>
+		</div>
+
+		<script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
+		<script src="/dist/reveal.js"></script>
+		<script src="/plugin/notes/notes.js"></script>
+		<script src="/plugin/markdown/markdown.js"></script>
+		<script src="/plugin/highlight/highlight.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+			});
+		</script>
+	</body>
+</html>
