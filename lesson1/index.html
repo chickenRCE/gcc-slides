@@ -340,7 +340,11 @@ mov     rcx, rbx
 				</section>
 				<section>
 					<h2><code>mov</code></h2>
-					<iframe loading="lazy" class="w-full h-80" src="http://localhost:3000/omulator/?code=bW92IHJheCwgMTMzNwptb3YgcmJ4LCAyMDIyCm1vdiByY3gsIHJieA%3D%3D" scrolling="no" frameborder="0"></iframe loading="lazy">
+					<iframe loading="lazy" class="w-full h-80" src="http://localhost:3000/omulator/?code=bW92IHJheCwgMHgxMzM3Cm1vdiByYngsIDB4MjAyMgptb3YgcmN4LCByYngK" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+				<section>
+					<h2><code>mov (memory)</code></h2>
+					<iframe loading="lazy" class="w-full h-80" src="http://localhost:3000/omulator/?code=bW92IHJheCwgMHgxMzM3Cm1vdiByZHgsIDB4MjAwMAptb3YgUVdPUkQgUFRSIFtyZHhdLCByYXgKbW92IERXT1JEIFBUUiBbcmR4KzB4OF0sIDB4ZGVhZAo%3D" scrolling="no" frameborder="0"></iframe loading="lazy">
 				</section>
 				<section>
 					<h2><code>add/sub</code></h2>
@@ -363,10 +367,13 @@ add     rax, rbx
 				</section>
 				<section>
 					<h2><code>add/sub</code></h2>
-					<iframe loading="lazy" class="w-full h-80" src="http://localhost:3000/omulator/?code=bW92IHJheCwgMTAwCm1vdiByYngsIDIwMAphZGQgcmF4LCByYngK" scrolling="no" frameborder="0"></iframe loading="lazy">
+					<iframe loading="lazy" class="w-full h-80" src="http://localhost:3000/omulator/?code=bW92IHJheCwgMHgxMDAKbW92IHJieCwgMHgyMDAKYWRkIHJheCwgcmJ4Cg%3D%3D" scrolling="no" frameborder="0"></iframe loading="lazy">
 				</section>
 				<section>
-					<h2>Mini Challenges <span class="accent">#1</span></h2>
+					<h2>Mini Challenge <span class="accent">#1</span></h2>
+				</section>
+				<section>
+					<h2>Mini Challenge <span class="accent">#2</span></h2>
 				</section>
 				<section>
 					<h2>What about more <span class="accent-underline">complex</span> code?</h2>
@@ -395,9 +402,9 @@ else {
 						<div class="right w-4/12">
 							<h5>Sample Code</h5>
 							<pre><code class="x86asm" data-trim data-noescape>
-mov     rax, 100
+mov     rax, 0x100
 jmp     skip
-mov     rax, 1337
+mov     rax, 0x1337
 skip:
 nop
 nop
@@ -407,7 +414,7 @@ nop
 				</section>
 				<section>
 					<h2><code>jmp</code></h2>
-					<iframe loading="lazy" class="w-full h-80" src="http://localhost:3000/omulator/?code=bW92IHJheCwgMTAwCmptcCBza2lwCm1vdiByYXgsIDEzMzcKc2tpcDoKbm9wCm5vcAo%3D" scrolling="no" frameborder="0"></iframe loading="lazy">
+					<iframe loading="lazy" class="w-full h-80" src="http://localhost:3000/omulator/?code=bW92IHJheCwgMHgxMDAKam1wIHNraXAKbW92IHJheCwgMHgxMzM3CnNraXA6Cm5vcApub3AK" scrolling="no" frameborder="0"></iframe loading="lazy">
 				</section>
 				<section>
 					<h2><code>cmp</code></h2>
@@ -421,8 +428,8 @@ nop
 						<div class="right w-4/12">
 							<h5>Sample Code</h5>
 							<pre><code class="x86asm" data-trim data-noescape>
-mov     rax, 100
-mov     rbx, 200
+mov     rax, 0x100
+mov     rbx, 0x200
 cmp     rax, rbx
 							</code></pre>
 						</div>
@@ -440,8 +447,8 @@ cmp     rax, rbx
 						<div class="right w-4/12">
 							<h5>Sample Code</h5>
 							<pre><code class="x86asm" data-trim data-noescape>
-mov     rax, 100
-mov     rbx, 200
+mov     rax, 0x100
+mov     rbx, 0x200
 cmp     rax, rbx
 mov     rcx, rax
 jl      rbx_lesser
@@ -454,7 +461,7 @@ nop
 				</section>
 				<section>
 					<h2><code>jmp (cond)</code></h2>
-					<iframe loading="lazy" class="w-full h-80" src="http://localhost:3000/omulator/?code=bW92ICByYXgsIDEwMAptb3YgIHJieCwgMjAwCmNtcCAgcmF4LCByYngKbW92ICByY3gsIHJieApqbCAgIHJheF9sZXNzZXIKbW92ICByY3gsIHJheApyYXhfbGVzc2VyOgpub3AK" scrolling="no" frameborder="0"></iframe loading="lazy">
+					<iframe loading="lazy" class="w-full h-80" src="http://localhost:3000/omulator/?code=bW92ICByYXgsIDB4MTAwCm1vdiAgcmJ4LCAweDIwMApjbXAgIHJheCwgcmJ4Cm1vdiAgcmN4LCByYngKamwgICByYXhfbGVzc2VyCm1vdiAgcmN4LCByYXgKcmF4X2xlc3NlcjoKbm9wCg%3D%3D" scrolling="no" frameborder="0"></iframe loading="lazy">
 				</section>
 				<section>
 					<h2><code>call</code></h2>
@@ -472,7 +479,7 @@ nop
 call    foo
 hlt
 foo:
-mov     rax, 0
+mov     rax, 0x1337
 ret
 nop
 							</code></pre>
@@ -481,10 +488,10 @@ nop
 				</section>
 				<section>
 					<h2><code>call</code></h2>
-					<iframe loading="lazy" class="w-full h-80" src="http://localhost:3000/omulator/?code=bm9wCmNhbGwgZm9vCmhsdApmb286Cm1vdiAgcmF4LCAwCnJldApub3A%3D" scrolling="no" frameborder="0"></iframe loading="lazy">
+					<iframe loading="lazy" class="w-full h-80" src="http://localhost:3000/omulator/?code=bm9wCmNhbGwgZm9vCmhsdApmb286Cm1vdiAgcmF4LCAweDEzMzcKcmV0Cm5vcAo%3D" scrolling="no" frameborder="0"></iframe loading="lazy">
 				</section>
 				<section>
-					<h2>Mini Challenges <span class="accent">#2</span></h2>
+					<h2>Mini Challenge <span class="accent">#3</span></h2>
 				</section>
 			</div>
 		</div>

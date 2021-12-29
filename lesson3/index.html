@@ -51,11 +51,58 @@
 					<iframe loading="lazy" class="w-full h-96" src="http://localhost:3000/omulator/?code=bWFpbjoKICBwdXNoICByYnAKICBtb3YgICByYnAsIHJzcAogIG1vdiAgIGVheCwgMAogIGNhbGwgIGEKICBub3AKICBwb3AgICByYnAKICByZXQKYToKICBwdXNoICByYnAKICBtb3YgICByYnAsIHJzcAogIHN1YiAgIHJzcCwgMTYKICBtb3YgICBEV09SRCBQVFIgW3JicC00XSwgMHhBQUFBCiAgbW92ICAgZWF4LCAwCiAgY2FsbCAgYgogIG5vcAogIGxlYXZlCiAgcmV0CmI6CiAgcHVzaCAgcmJwCiAgbW92ICAgcmJwLCByc3AKICBtb3YgICBEV09SRCBQVFIgW3JicC00XSwgMHhCQkJCCiAgbm9wCiAgcG9wICAgcmJwCiAgcmV0" scrolling="no" frameborder="0"></iframe loading="lazy">
 				</section>
 				<section>
+					<h2>Are locals protected from each other?</h2>
+				</section>
+				<section>
+					<h2>Consider the following:</h2>
+					<pre><code class="c" data-trim data-noescape>
+int foo(int index, int val) {
+    int arr[4] = {1, 2, 3, 4};
+    int untouched = 0x1337;
+    arr[index] = val;
+    return untouched;
+}
+
+void main() {
+    foo(0, 0xdead);
+}
+					</code></pre>
+				</section>
+				<section>
+					<h2><code>Function locals</code></h2>
+					<iframe loading="lazy" class="w-full h-96" src="http://localhost:3000/omulator/?code=bWFpbjoKICBwdXNoICByYnAKICBtb3YgICByYnAsIHJzcAogIG1vdiAgIGVzaSwgMHhkZWFkCiAgbW92ICAgZWRpLCAwCiAgY2FsbCAgZm9vCiAgbm9wCiAgcG9wICAgcmJwCiAgcmV0CmZvbzoKICBwdXNoICByYnAKICBtb3YgICByYnAsIHJzcAogIHN1YiAgIHJzcCwgNDgKICBtb3YgICBEV09SRCBQVFIgW3JicC0zNl0sIGVkaQogIG1vdiAgIERXT1JEIFBUUiBbcmJwLTQwXSwgZXNpCiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtMzJdLCAxCiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtMjhdLCAyCiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtMjRdLCAzCiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtMjBdLCA0CiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtNF0sIDB4MTMzNwogIG1vdiAgIGVheCwgRFdPUkQgUFRSIFtyYnAtMzZdCiAgY2RxZQogIG1vdiAgIGVkeCwgRFdPUkQgUFRSIFtyYnAtNDBdCiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtMzIrcmF4KjRdLCBlZHgKICBtb3YgICBlYXgsIERXT1JEIFBUUiBbcmJwLTRdCiAgbGVhdmUKICByZXQK" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+				<section>
+					<h2>What if we went out of bounds?</h2>
+					<pre><code class="c" data-trim data-noescape>
+int foo(int index, int val) {
+    int arr[4] = {1, 2, 3, 4};
+    int untouched = 0x1337;
+    arr[index] = val;
+    return untouched;
+}
+
+void main() {
+    foo(7, 0xdead);
+}
+					</code></pre>
+				</section>
+				<section>
+					<h2><code>Out of bounds locals</code></h2>
+					<iframe loading="lazy" class="w-full h-96" src="http://localhost:3000/omulator/?code=bWFpbjoKICBwdXNoICByYnAKICBtb3YgICByYnAsIHJzcAogIG1vdiAgIGVzaSwgMHhkZWFkCiAgbW92ICAgZWRpLCAwCiAgY2FsbCAgZm9vCiAgbm9wCiAgcG9wICAgcmJwCiAgcmV0CmZvbzoKICBwdXNoICByYnAKICBtb3YgICByYnAsIHJzcAogIHN1YiAgIHJzcCwgNDgKICBtb3YgICBEV09SRCBQVFIgW3JicC0zNl0sIGVkaQogIG1vdiAgIERXT1JEIFBUUiBbcmJwLTQwXSwgZXNpCiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtMzJdLCAxCiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtMjhdLCAyCiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtMjRdLCAzCiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtMjBdLCA0CiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtNF0sIDB4MTMzNwogIG1vdiAgIGVheCwgRFdPUkQgUFRSIFtyYnAtMzZdCiAgY2RxZQogIG1vdiAgIGVkeCwgRFdPUkQgUFRSIFtyYnAtNDBdCiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtMzIrcmF4KjRdLCBlZHgKICBtb3YgICBlYXgsIERXT1JEIFBUUiBbcmJwLTRdCiAgbGVhdmUKICByZXQK" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+				<section>
+					<div class="flex justify-center">
+						<img src="http://dearkidlovemom.com/wp-content/uploads/2014/10/but-wait-theres-more.jpg" alt="">
+					</div>
+				</section>
+				<!-- Later -->
+				<section>
 					<h2>What happens when we destroy the stack?</h2>
 				</section>
 				<section>
-					<h2><code>destroying the stack</code></h2>
-					<iframe loading="lazy" class="w-full h-96" src="http://localhost:3000/omulator/?code=bWFpbjoKICBwdXNoICByYnAKICBtb3YgICByYnAsIHJzcAogIG1vdiAgIGVheCwgMAogIGNhbGwgIGEKICBub3AKICBwb3AgICByYnAKICByZXQKYToKICBwdXNoICByYnAKICBtb3YgICByYnAsIHJzcAogIHN1YiAgIHJzcCwgMTYKICBtb3YgICBEV09SRCBQVFIgW3JicCs4XSwgMHhBQUFBCiAgbGVhdmUKICByZXQK" scrolling="no" frameborder="0"></iframe loading="lazy">
+					<h2><code>Destroying the stack</code></h2>
+					<iframe loading="lazy" class="w-full h-96" src="http://localhost:3000/omulator/?code=bWFpbjoKICBwdXNoICByYnAKICBtb3YgICByYnAsIHJzcAogIG1vdiAgIGVzaSwgMHhkZWFkCiAgbW92ICAgZWRpLCAwCiAgY2FsbCAgZm9vCiAgbm9wCiAgcG9wICAgcmJwCiAgcmV0CmZvbzoKICBwdXNoICByYnAKICBtb3YgICByYnAsIHJzcAogIHN1YiAgIHJzcCwgNDgKICBtb3YgICBEV09SRCBQVFIgW3JicC0zNl0sIGVkaQogIG1vdiAgIERXT1JEIFBUUiBbcmJwLTQwXSwgZXNpCiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtMzJdLCAxCiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtMjhdLCAyCiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtMjRdLCAzCiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtMjBdLCA0CiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtNF0sIDB4MTMzNwogIG1vdiAgIGVheCwgRFdPUkQgUFRSIFtyYnAtMzZdCiAgY2RxZQogIG1vdiAgIGVkeCwgRFdPUkQgUFRSIFtyYnAtNDBdCiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtMzIrcmF4KjRdLCBlZHgKICBtb3YgICBlYXgsIERXT1JEIFBUUiBbcmJwLTRdCiAgbGVhdmUKICByZXQK" scrolling="no" frameborder="0"></iframe loading="lazy">
 				</section>
 			</div>
 		</div>
