@@ -92,17 +92,49 @@ void main() {
 					<iframe loading="lazy" class="w-full h-96" src="http://localhost:3000/omulator/?code=bWFpbjoKICBwdXNoICByYnAKICBtb3YgICByYnAsIHJzcAogIG1vdiAgIGVzaSwgMHhkZWFkCiAgbW92ICAgZWRpLCAwCiAgY2FsbCAgZm9vCiAgbm9wCiAgcG9wICAgcmJwCiAgcmV0CmZvbzoKICBwdXNoICByYnAKICBtb3YgICByYnAsIHJzcAogIHN1YiAgIHJzcCwgNDgKICBtb3YgICBEV09SRCBQVFIgW3JicC0zNl0sIGVkaQogIG1vdiAgIERXT1JEIFBUUiBbcmJwLTQwXSwgZXNpCiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtMzJdLCAxCiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtMjhdLCAyCiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtMjRdLCAzCiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtMjBdLCA0CiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtNF0sIDB4MTMzNwogIG1vdiAgIGVheCwgRFdPUkQgUFRSIFtyYnAtMzZdCiAgY2RxZQogIG1vdiAgIGVkeCwgRFdPUkQgUFRSIFtyYnAtNDBdCiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtMzIrcmF4KjRdLCBlZHgKICBtb3YgICBlYXgsIERXT1JEIFBUUiBbcmJwLTRdCiAgbGVhdmUKICByZXQK" scrolling="no" frameborder="0"></iframe loading="lazy">
 				</section>
 				<section>
+					<h2>Hold on, this isn't a <strong>buffer</strong> overflow</h2>
+					<div class="flex justify-center">
+						<img src="https://cdn.discordapp.com/emojis/726046300881289248.png?size=96" alt="">
+					</div>
+				</section>
+				<section>
+					<h2>Consider the following:</h2>
+					<pre><code class="c" data-trim data-noescape>
+int main() {
+    char buf[16];
+    int untouched = 0xdead;
+    gets(buf);
+    return untouched;
+}
+					</code></pre>
+				</section>
+				<section>
+					<h2><code>Buffer overflow (variable)</code></h2>
+					<iframe loading="lazy" class="w-full h-96" src="http://localhost:3000/omulator/?code=bWFpbjoKICBwdXNoIHJicAogIG1vdiAgcmJwLCByc3AKICBzdWIgIHJzcCwgMzIKICBtb3YgIERXT1JEIFBUUiBbcmJwLTRdLCAweGRlYWQKICBsZWEgIHJheCwgW3JicC0zMl0KICBtb3YgIHJkaSwgcmF4CiAgY2FsbCBnZXRzCiAgbW92ICBlYXgsIERXT1JEIFBUUiBbcmJwLTRdCiAgbGVhdmUKICByZXQKCmdldHM6CiAgbW92ICByZHgsIDAKICBtb3YgIHJzaSwgMHgxMDAwCmdldHNfbG9vcDoKICBjbXAgIEJZVEUgUFRSIFtyc2krcmR4XSwgMAogIGplICAgZ2V0c19lbmQKICBtb3YgIGFsLCBCWVRFIFBUUiBbcnNpK3JkeF0KICBtb3YgIEJZVEUgUFRSIFtyZGkrcmR4XSwgYWwKICBhZGQgIHJkeCwgMQogIGptcCAgZ2V0c19sb29wCmdldHNfZW5kOgogIHJldA%3D%3D&input=NDE0MTQxNDE0MjQyNDI0MjQzNDM0MzQzNDQ0NDQ0NDQ%3D" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+				<section>
+					<h2>Pretty cool!</h2>
+				</section>
+				<section>
 					<div class="flex justify-center">
 						<img src="http://dearkidlovemom.com/wp-content/uploads/2014/10/but-wait-theres-more.jpg" alt="">
 					</div>
 				</section>
-				<!-- Later -->
 				<section>
 					<h2>What happens when we destroy the stack?</h2>
 				</section>
 				<section>
+					<div class="flex justify-center">
+						<img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fd%2Fd3%2FCall_stack_layout.svg%2F342px-Call_stack_layout.svg.png&f=1&nofb=1" alt="">
+					</div>
+				</section>
+				<section>
 					<h2><code>Destroying the stack</code></h2>
 					<iframe loading="lazy" class="w-full h-96" src="http://localhost:3000/omulator/?code=bWFpbjoKICBwdXNoICByYnAKICBtb3YgICByYnAsIHJzcAogIG1vdiAgIGVzaSwgMHhkZWFkCiAgbW92ICAgZWRpLCAwCiAgY2FsbCAgZm9vCiAgbm9wCiAgcG9wICAgcmJwCiAgcmV0CmZvbzoKICBwdXNoICByYnAKICBtb3YgICByYnAsIHJzcAogIHN1YiAgIHJzcCwgNDgKICBtb3YgICBEV09SRCBQVFIgW3JicC0zNl0sIGVkaQogIG1vdiAgIERXT1JEIFBUUiBbcmJwLTQwXSwgZXNpCiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtMzJdLCAxCiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtMjhdLCAyCiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtMjRdLCAzCiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtMjBdLCA0CiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtNF0sIDB4MTMzNwogIG1vdiAgIGVheCwgRFdPUkQgUFRSIFtyYnAtMzZdCiAgY2RxZQogIG1vdiAgIGVkeCwgRFdPUkQgUFRSIFtyYnAtNDBdCiAgbW92ICAgRFdPUkQgUFRSIFtyYnAtMzIrcmF4KjRdLCBlZHgKICBtb3YgICBlYXgsIERXT1JEIFBUUiBbcmJwLTRdCiAgbGVhdmUKICByZXQK" scrolling="no" frameborder="0"></iframe loading="lazy">
+				</section>
+				<section>
+					<h2><code>Buffer overflow (stack)</code></h2>
+					<iframe loading="lazy" class="w-full h-96" src="http://localhost:3000/omulator/?code=bWFpbjoKICBwdXNoIHJicAogIG1vdiAgcmJwLCByc3AKICBzdWIgIHJzcCwgMzIKICBtb3YgIERXT1JEIFBUUiBbcmJwLTRdLCAweGRlYWQKICBsZWEgIHJheCwgW3JicC0zMl0KICBtb3YgIHJkaSwgcmF4CiAgY2FsbCBnZXRzCiAgbW92ICBlYXgsIERXT1JEIFBUUiBbcmJwLTRdCiAgbGVhdmUKICByZXQKCmdldHM6CiAgbW92ICByZHgsIDAKICBtb3YgIHJzaSwgMHgxMDAwCmdldHNfbG9vcDoKICBjbXAgIEJZVEUgUFRSIFtyc2krcmR4XSwgMAogIGplICAgZ2V0c19lbmQKICBtb3YgIGFsLCBCWVRFIFBUUiBbcnNpK3JkeF0KICBtb3YgIEJZVEUgUFRSIFtyZGkrcmR4XSwgYWwKICBhZGQgIHJkeCwgMQogIGptcCAgZ2V0c19sb29wCmdldHNfZW5kOgogIHJldA%3D%3D&input=NDE0MTQxNDE0MjQyNDI0MjQzNDM0MzQzNDQ0NDQ0NDQ%3D" scrolling="no" frameborder="0"></iframe loading="lazy">
 				</section>
 			</div>
 		</div>
