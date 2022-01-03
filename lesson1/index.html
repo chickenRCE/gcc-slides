@@ -208,6 +208,35 @@ ret
 					</div>
 				</section>
 				<section>
+					<h2>Program Compilation</h2>
+					<div class="flex flex-row">
+						<div class="w-1/2">
+							<h4>gcc/compiler</h4>
+							<pre><code class="c" data-trim data-noescape>
+int main(){
+    int a = 1337;
+    int b = 31337;
+    return a+b;
+}
+							</code></pre>
+						</div>
+						<div class="w-1/2">
+							<h4>x86-64 cpu</h4>
+							<pre><code class="x86asm" data-trim data-noescape>
+push    rbp
+mov     rbp, rsp
+mov     DWORD PTR [rbp-4], 1337
+mov     DWORD PTR [rbp-8], 31337
+mov     edx, DWORD PTR [rbp-4]
+mov     eax, DWORD PTR [rbp-8]
+add     eax, edx
+pop     rbp
+ret
+							</code></pre>
+						</div>
+					</div>
+				</section>
+				<section>
 					<h2>Internally ...</h2>
 					<div class="flex flex-row">
 						<div class="w-1/2">
@@ -238,43 +267,6 @@ C7 45 F8 69 7A 00 00
 C3
 							</code></pre>
 						</div>
-					</div>
-				</section>
-				<section>
-					<h2>How can we <span class="accent-underline">analyse</span> such programs?</h2>
-				</section>
-				<section>
-					<div class="flex">
-						<h4>..Disassemblers</h4>
-					</div>
-					<table>
-						<tr>
-							<th></th>
-							<th>Ghidra</th>
-							<th>Binary Ninja</th>
-							<th>IDA</th>
-						</tr>
-						<tr>
-							<th>Free?</th>
-							<td>Yes!</td>
-							<td>Free-ish</td>
-							<td>No/Yes</td>
-						</tr>
-						<tr>
-							<th>Decompiler?</th>
-							<td>Yes!</td>
-							<td>Kinda</td>
-							<td>Yes/No</td>
-						</tr>
-						<tr>
-							<th>*NSA backdoor?</th>
-							<td>Yes!</td>
-							<td>Hopefully not</td>
-							<td style="vertical-align: middle;"><img style="margin: 0;" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSNbVSVXVd5Il9eeD4Lbup3pqtJ3Kn-a1bueH56ZA1oWcFqw9i7LaIKUWzBE7FZAlHyKwo&usqp=CAU" alt=""></td>
-						</tr>
-					</table> 
-					<div class="flex flex-row-reverse">
-						<small>*Ghidra/IDA is fine, just a joke.</small>
 					</div>
 				</section>
 				<section>
@@ -346,8 +338,8 @@ nop
 						<div class="right w-4/12">
 							<h5>Sample Code</h5>
 							<pre><code class="x86asm" data-trim data-noescape>
-mov     rax, 1337
-mov     rbx, 2022
+mov     rax, 0x1337
+mov     rbx, 0x2022
 mov     rcx, rbx
 							</code></pre>
 						</div>
@@ -373,8 +365,8 @@ mov     rcx, rbx
 						<div class="right w-4/12">
 							<h5>Sample Code</h5>
 							<pre><code class="x86asm" data-trim data-noescape>
-mov     rax, 100
-mov     rbx, 200
+mov     rax, 0x100
+mov     rbx, 0x200
 add     rax, rbx
 							</code></pre>
 						</div>
