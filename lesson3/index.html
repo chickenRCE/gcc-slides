@@ -136,6 +136,204 @@ int main() {
 					<h2><code>Buffer overflow (stack)</code></h2>
 					<iframe loading="lazy" class="w-full h-96" src="http://localhost:3000/omulator/?code=bWFpbjoKICBwdXNoIHJicAogIG1vdiAgcmJwLCByc3AKICBzdWIgIHJzcCwgMzIKICBtb3YgIERXT1JEIFBUUiBbcmJwLTRdLCAweGRlYWQKICBsZWEgIHJheCwgW3JicC0zMl0KICBtb3YgIHJkaSwgcmF4CiAgY2FsbCBnZXRzCiAgbW92ICBlYXgsIERXT1JEIFBUUiBbcmJwLTRdCiAgbGVhdmUKICByZXQKCmdldHM6CiAgbW92ICByZHgsIDAKICBtb3YgIHJzaSwgMHgxMDAwCmdldHNfbG9vcDoKICBjbXAgIEJZVEUgUFRSIFtyc2krcmR4XSwgMAogIGplICAgZ2V0c19lbmQKICBtb3YgIGFsLCBCWVRFIFBUUiBbcnNpK3JkeF0KICBtb3YgIEJZVEUgUFRSIFtyZGkrcmR4XSwgYWwKICBhZGQgIHJkeCwgMQogIGptcCAgZ2V0c19sb29wCmdldHNfZW5kOgogIHJldA%3D%3D&input=NDE0MTQxNDE0MjQyNDI0MjQzNDM0MzQzNDQ0NDQ0NDQ%3D" scrolling="no" frameborder="0"></iframe loading="lazy">
 				</section>
+				<section>
+					<h2>Any h4x in real life?</h2>
+				</section>
+				<section>
+					<h2>CVE-2015-7504</h2>
+					<p class="text-2xl"><span class="accent-underline">Heap-based buffer overflow</span> in the <code>pcnet_receive</code> function in <code>hw/net/pcnet.c</code> in QEMU allows guest OS administrators to cause a denial of service (instance crash) or <span class="accent-underline">possibly execute arbitrary code</span> via a series of packets in loopback mode.</p>
+				</section>
+				<section>
+					<h2>QEMU is <span class="text-2xl">a free and open-source hypervisor</span></h2>
+					<p class="text-2xl pt-2">Normally used to run different guest operating systems, e.g. IOT firmware, Linux</p>
+					<p class="text-2xl">emulating other CPU architectures, e.g. ARM, MIPS</p>
+				</section>
+				<section>
+					<h2><span class="text-5xl">Vulnerability</span> <span class="text-3xl">in the AMD PCNET network card emulator</span></h2>
+					<p style="padding-bottom: 1.2rem" class="text-sm">This piece of code in <code>pcnet_receive</code> appends a CRC checksum to the end of a packet.</p>
+					<pre><code class="cpp text-xs rounded shadow p-8" style="padding:1.1rem" data-trim data-noescape>
+uint8_t *src = s->buffer;	/* this is the packet */
+
+/* ... */
+else if (s->looptest == PCNET_LOOPTEST_CRC ||
+			!CSR_DXMTFCS(s) || size < MIN_BUF_SIZE+4) {     /* just one of these conditions need to be true */
+	uint32_t fcs = ~0;              /* the accumulated checksum */
+	uint8_t *p = src;
+
+	/* go through the packet byte by byte, and keep updating the checksum */
+	while (p != &src[size])         /* stop after reading up to the given size */
+		CRC(fcs, *p++);               /* update fcs with the CRC checksum, also increments p */
+
+	*(uint32_t *)p = htonl(fcs);    /* save the checksum at the end of the packet */
+
+	size += 4;
+}
+					</code></pre>
+					<p style="padding-top: 1.2rem" class="text-xs">Hmm, everything looks ok so far?</p>
+				</section>
+				<section>
+					<h2><span class="text-4xl"><code>PCNetState</code> structure</span></h2>
+					<pre><code class="cpp text-xs rounded shadow p-8" style="padding:1.1rem" data-trim data-noescape>
+struct PCNetState_st {
+	NICState *nic;
+	NICConf conf;
+	QEMUTimer *poll_timer;
+	int rap, isr, lnkst;
+	uint32_t rdra, tdra;
+	uint8_t prom[16];
+	uint16_t csr[128];
+	uint16_t bcr[32];
+	int xmit_pos;
+	uint64_t timer;
+	MemoryRegion mmio;
+	uint8_t buffer[4096];          /* the packet */
+	qemu_irq irq;                  /* can we write the checksum into here 🤔 */
+	void (*phys_mem_read)(void *dma_opaque, hwaddr addr,
+							uint8_t *buf, int len, int do_bswap);
+	void (*phys_mem_write)(void *dma_opaque, hwaddr addr,
+							uint8_t *buf, int len, int do_bswap);
+	void *dma_opaque;
+	int tx_busy;
+	int looptest;
+};
+					</code></pre>
+					<p style="padding-top: 1.2rem" class="text-xs">This is the structure of <code>s</code> in the previous slide</p>
+					<p class="text-xs">Btw, the program accepts a packet (<code>buffer</code>) with <code>size</code> of 4kB (<code>4096</code> bytes) 😏</p>
+				</section>
+				<section>
+					<h2><span class="text-4xl"><code>IRQState</code> structure</span></h2>
+					<pre><code class="cpp text-xs rounded shadow p-8" style="padding:1.1rem" data-trim data-noescape>
+typedef void (*qemu_irq_handler)(void *opaque, int n, int level);
+
+struct IRQState {
+	Object parent_obj;
+	qemu_irq_handler handler;
+	void *opaque;
+	int n;
+};
+					</code></pre>
+					<pre><code class="cpp text-xs rounded shadow p-8" style="padding:1.1rem" data-trim data-noescape>
+typedef struct IRQState *qemu_irq;
+					</code></pre>
+					<pre><code class="cpp text-xs rounded shadow p-8" style="padding:1.1rem" data-trim data-noescape>
+struct PCNetState_st {
+	/* ... */
+	uint8_t buffer[4096];          /* the packet */
+	qemu_irq irq;                  /* can we write the checksum into here 🤔 */
+	/* ... */
+};
+					</code></pre>
+					<p style="padding-top: 1.2rem" class="text-xs"><code>qemu_irq</code> is a pointer to an <code>IRQState</code></p>
+					<p class="text-xs">Importantly, there is a function pointer (<code>qemu_irq_handler handler</code>) in an <code>IRQState</code></p>
+				</section>
+				<section>
+					<h2><span class="text-4xl">When is <code>handler</code> used?</h2>
+					<p style="padding-bottom: 1.2rem" class="text-base">A few times... e.g. <code class="text-sm">pcnet_receive --> pcnet_update_irq --> qemu_set_irq</code></p>
+					<pre><code class="cpp text-xs rounded shadow p-8" style="padding:1.1rem" data-trim data-noescape>
+void qemu_set_irq(qemu_irq irq, int level)
+{
+	if (!irq)
+		return;
+
+	irq->handler(irq->opaque, irq->n, level);
+}
+					</code></pre>
+					<p style="padding-top: 1.2rem" class="text-xs">So, what if we can control <code>handler</code>?</code></p>
+				</section>
+				<section>
+					<h2><span class="text-4xl">To summarize what is going on</h2>
+					<p style="padding-bottom: 0.6rem" class="text-base">Attacker sends a packet of <code>4096</code> bytes</p>
+					<pre><code class="cpp text-xs rounded shadow p-8" style="padding:1rem" data-trim data-noescape>
+/*
+*     pcnet_receive()
+* appends checksum to end of Buffer
+*           |
+*           |
+* if buffer size is 4096
+*           |           PCNetState_st
+*           |             +--------+
+* write the checksum      |  ...   |
+*    out-of-bounds        +--------+
+*           |             | buffer |
+*           |             +--------+
+*           +------------>|  irq   +----+        IRQState
+*                         +--------+    |       +---------+
+*                         |  ...   |    |       |   ...   |
+*                         +--------+    |       +---------+
+*                                       +------>| handler |
+*                                               +---------+
+*                                               |   ...   |
+*                                               +---------+
+*/
+					</code></pre>
+					<p style="padding-top: 1.2rem" class="text-sm">The <code>irq</code> field is overwritten</p>
+				</section>
+				<section>
+					<h2><span class="text-4xl">To summarize what is going on</h2>
+					<p class="text-base">The attacker can create a fake <code>IRQState</code> somewhere in memory.</p>
+					<p class="text-base">Then, set the packet contents so that its <span class="accent-underline">checksum</span> is the address of the fake <code>IRQState</code></p>
+					<pre><code class="cpp text-xs rounded shadow p-8" style="padding:1rem" data-trim data-noescape>
+/*
+*     pcnet_receive()
+* appends checksum to end of buffer
+*           |                                     Fake IRQState
+*           |                                    +--------------+
+* if buffer size is 4096                         |     ...      |
+*           |           PCNetState_st            +--------------+
+*           |             +--------+    +------->|   handler    |
+* write the checksum      |  ...   |    |        +--------------+
+*    out-of-bounds        +--------+    |        |     ...      |
+*           |             | buffer |    |        +--------------+
+*           |             +--------+    |
+*           +------------>|  irq   +----+        IRQState
+*                         +--------+    x       +---------+
+*                         |  ...   |    x       |   ...   |
+*                         +--------+    |       +---------+
+*                                       +------>| handler |
+*                                               +---------+
+*                                               |   ...   |
+*                                               +---------+
+*/
+					</code></pre>
+					<p style="padding-top: 1.2rem" class="text-sm">The <code>handler</code> field is now attacker-controlled</p>
+				</section>
+				<section>
+					<h2><span class="text-4xl">To summarize what is going on</h2>
+					<p style="padding-bottom: 0.6rem" class="text-sm">At the end of <code>pcnet_receive</code>, it calls <code>pcnet_update_irq</code>, which calls <code>qemu_set_irq</code>, which calls the attacker-controlled <code>handler</code></p>
+					<pre><code class="cpp text-xs rounded shadow p-8" style="padding:1rem" data-trim data-noescape>
+/*
+*                                                                            pcnet_receive
+*                                                                                 |
+*     pcnet_receive()                                                             v
+* appends checksum to end of buffer                                         pcnet_update_irq
+*           |                                     Fake IRQState                   |
+*           |                                    +--------------+                 v
+* if buffer size is 4096                         |     ...      |            qemu_set_irq
+*           |           PCNetState_st            +--------------+                 |
+*           |             +--------+    +------->|   handler    |<----------------+
+* write the checksum      |  ...   |    |        +--------------+
+*    out-of-bounds        +--------+    |        |     ...      |
+*           |             | buffer |    |        +--------------+
+*           |             +--------+    |
+*           +------------>|  irq   +----+        IRQState
+*                         +--------+    x       +---------+
+*                         |  ...   |    x       |   ...   |
+*                         +--------+    |       +---------+
+*                                       +------>| handler |
+*                                               +---------+
+*                                               |   ...   |
+*                                               +---------+
+*/
+					</code></pre>
+					<p style="padding-top: 1.2rem" class="text-sm">Attacker now has arbitrary code execution</p>
+				</section>
+				<section>
+					<h2><span class="text-3xl">Erm, but how does the attacker know the address of the fake <code>IRQState</code></h2>
+					<p class="text-base">Need to chain this bug with a memory leak vulnerability, e.g. out-of-bounds read/copy</p>
+				</section>
+				<section>
+					<h2><span class="text-4xl">For more detailed info, check out this <a href="http://www.phrack.org/issues/70/5.html">Phrack article</a></h2>
+				</section>
 			</div>
 		</div>
 
