@@ -331,8 +331,7 @@ void qemu_set_irq(qemu_irq irq, int level)
 				</section>
 				<section>
 					<h2><span class="text-4xl">To summarize what is going on</h2>
-					<p class="text-base">The attacker can create a fake <code>IRQState</code> somewhere in memory.</p>
-					<p class="text-base">Then, set the packet contents so that its <span class="accent-underline">checksum</span> is the address of the fake <code>IRQState</code></p>
+					<p class="text-base">The attacker can create a fake <code>IRQState</code> somewhere in memory. Then, set the packet contents so that its <span class="accent-underline">checksum</span> is the address of the fake <code>IRQState</code></p>
 					<pre><code class="cpp text-xs rounded shadow p-8" style="padding:1rem" data-trim data-noescape>
 /*
 *     pcnet_receive()
